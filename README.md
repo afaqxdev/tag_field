@@ -49,5 +49,5 @@ Add the latest version of `tag_field` to your `pubspec.yaml` dependencies:
 
 ```yaml
 dependencies:
-  tag_field: ^1.0.2
+  tag_field: ^latest_version
 ````
