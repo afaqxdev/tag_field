@@ -249,8 +249,7 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
         children: [
           Text(
             tag,
-            style:
-                widget.tagTextStyle ??
+            style: widget.tagTextStyle ??
                 TextStyle(color: widget.tagTextColor, fontSize: 14),
           ),
           if (widget.showDeleteIcon && widget.enabled) ...[
@@ -289,12 +288,11 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children:
-              tags
-                  .asMap()
-                  .entries
-                  .map((entry) => _buildTag(entry.value, entry.key, notifier))
-                  .toList(),
+          children: tags
+              .asMap()
+              .entries
+              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+              .toList(),
         );
 
       case TagInputLayout.inline:
@@ -303,24 +301,22 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children:
-              tags
-                  .asMap()
-                  .entries
-                  .map((entry) => _buildTag(entry.value, entry.key, notifier))
-                  .toList(),
+          children: tags
+              .asMap()
+              .entries
+              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+              .toList(),
         );
 
       case TagInputLayout.column:
         return Column(
           crossAxisAlignment: widget.crossAxisAlignment,
           mainAxisAlignment: widget.mainAxisAlignment,
-          children:
-              tags
-                  .asMap()
-                  .entries
-                  .map((entry) => _buildTag(entry.value, entry.key, notifier))
-                  .toList(),
+          children: tags
+              .asMap()
+              .entries
+              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+              .toList(),
         );
     }
   }
@@ -333,8 +329,7 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
       autofocus: widget.autofocus,
       style: widget.inputTextStyle,
       textInputAction: widget.textInputAction,
-      decoration:
-          widget.inputDecoration ??
+      decoration: widget.inputDecoration ??
           InputDecoration(
             hintText: widget.hintText,
             border: InputBorder.none,
@@ -394,39 +389,37 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
                   widget.containerBorderRadius,
                 ),
               ),
-              child:
-                  widget.layout == TagInputLayout.inline
-                      ? Wrap(
-                        spacing: widget.tagSpacing,
-                        runSpacing: widget.tagRunSpacing,
-                        alignment: widget.wrapAlignment,
-                        crossAxisAlignment: widget.wrapCrossAlignment,
-                        children: [
-                          ...notifier.tags.asMap().entries.map(
-                            (entry) =>
-                                _buildTag(entry.value, entry.key, notifier),
-                          ),
-                          Container(
-                            constraints: const BoxConstraints(minWidth: 100),
-                            child: IntrinsicWidth(
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 5),
-                                child: _buildInputField(notifier),
-                              ),
+              child: widget.layout == TagInputLayout.inline
+                  ? Wrap(
+                      spacing: widget.tagSpacing,
+                      runSpacing: widget.tagRunSpacing,
+                      alignment: widget.wrapAlignment,
+                      crossAxisAlignment: widget.wrapCrossAlignment,
+                      children: [
+                        ...notifier.tags.asMap().entries.map(
+                              (entry) =>
+                                  _buildTag(entry.value, entry.key, notifier),
+                            ),
+                        Container(
+                          constraints: const BoxConstraints(minWidth: 100),
+                          child: IntrinsicWidth(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 5),
+                              child: _buildInputField(notifier),
                             ),
                           ),
-                        ],
-                      )
-                      : Column(
-                        crossAxisAlignment: widget.crossAxisAlignment,
-                        mainAxisAlignment: widget.mainAxisAlignment,
-                        children: [
-                          _buildTags(notifier.tags, notifier),
-                          if (notifier.tags.isNotEmpty)
-                            const SizedBox(height: 8),
-                          _buildInputField(notifier),
-                        ],
-                      ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: widget.crossAxisAlignment,
+                      mainAxisAlignment: widget.mainAxisAlignment,
+                      children: [
+                        _buildTags(notifier.tags, notifier),
+                        if (notifier.tags.isNotEmpty) const SizedBox(height: 8),
+                        _buildInputField(notifier),
+                      ],
+                    ),
             ),
           );
         },
