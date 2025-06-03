@@ -25,6 +25,22 @@ Here is a quick demo of how the tag_field package works:
 
 ## Usage
 
+Import the package and use the `TagField` widget like this:
+
+```dart
+TagField(
+  initialTags: skillTags,
+  tagBackgroundColor: Colors.purple.shade100,
+  tagTextColor: Colors.purple.shade800,
+  tagBorderColor: Colors.purple.shade300,
+  deleteIconColor: Colors.purple.shade600,
+  containerBorderColor: Colors.purple.shade200,
+  containerBorderRadius: 12,
+  tagBorderRadius: 8,
+  hintText: 'Add your skills...',
+  separators: const [' ', ',', ';'],
+  onTagsChanged: (tags) => setState(() => skillTags = tags),
+)
 
 ## Installation
 
