@@ -21,7 +21,7 @@ Supports multiple layouts, custom styles, validation, and animated tag input.
 
 Here is a quick demo of how the tag_field package works:
 
-![TagField Demo](example/assets/demo.gif)
+![TagField Demo](https://raw.githubusercontent.com/afaqxdev/tag_field/main/example/assets/demo.gif)
 
 ## Usage
 
@@ -48,4 +48,4 @@ Add the latest version of `tag_field` to your `pubspec.yaml` dependencies:
 
 ```yaml
 dependencies:
-  tag_field: ^1.0.0
+  tag_field: ^1.0.2
