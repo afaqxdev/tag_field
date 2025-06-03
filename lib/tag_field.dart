@@ -1,4 +1,4 @@
-library tag_field;
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
