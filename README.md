@@ -41,11 +41,11 @@ TagField(
   separators: const [' ', ',', ';'],
   onTagsChanged: (tags) => setState(() => skillTags = tags),
 )
+```
 
 ## Installation
 
 Add the latest version of `tag_field` to your `pubspec.yaml` dependencies:
-```
 
 ```yaml
 dependencies:
