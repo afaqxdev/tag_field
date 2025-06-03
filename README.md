@@ -60,7 +60,10 @@ dependencies:
   <a href="https://github.com/afaqxdev">
     <img src="https://github.com/afaqxdev.png" width="48" height="48" style="border-radius:50%" alt="afaqxdev"/>
   </a>
-  <a href="https://github.com/someone">
+  <a href="https://github.com/ubaidxdev">
     <img src="https://github.com/ubaidxdev.png" width="48" height="48" style="border-radius:50%" alt="ubaidxdev"/>
+  </a>
+  <a href="https://github.com/uzairxdev">
+    <img src="https://github.com/uzairxdev" width="48" height="48" style="border-radius:50%" alt="uzairxdev"/>
   </a>
 </p>
