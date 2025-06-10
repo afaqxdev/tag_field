@@ -2,80 +2,11 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tag_field/tag_provider.dart';
 
 export 'package:provider/provider.dart'; // Export provider if needed
 
 export 'tag_field.dart';
-
-class TagInputNotifier extends ChangeNotifier {
-  List<String> _tags = [];
-  List<String> get tags => _tags;
-
-  final TagField widget;
-
-  TagInputNotifier(this.widget) {
-    _tags = List.from(widget.initialTags);
-  }
-
-  String _processTag(String tag) {
-    String processed = widget.trimTags ? tag.trim() : tag;
-    if (!widget.caseSensitive) {
-      processed = processed.toLowerCase();
-    }
-    return processed;
-  }
-
-  bool _isDuplicate(String tag) {
-    if (widget.allowDuplicates) return false;
-    String processedTag = _processTag(tag);
-    return _tags.any((existingTag) => _processTag(existingTag) == processedTag);
-  }
-
-  void addTag(String tag, [BuildContext? context]) {
-    if (tag.isEmpty) return;
-
-    String processedTag = _processTag(tag);
-    if (processedTag.isEmpty) return;
-
-    // Check for duplicates
-    if (_isDuplicate(processedTag)) return;
-
-    // Check max tags limit
-    if (widget.maxTags != null && _tags.length >= widget.maxTags!) return;
-
-    // Validate tag
-    if (widget.tagValidator != null) {
-      final validationError = widget.tagValidator!(processedTag);
-      if (validationError != null) {
-        if (context != null) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(validationError)));
-        }
-        return;
-      }
-    }
-
-    _tags.add(processedTag);
-    notifyListeners();
-
-    widget.onTagAdded?.call(processedTag);
-    widget.onTagsChanged?.call(_tags);
-  }
-
-  void removeTag(int index) {
-    if (index < 0 || index >= _tags.length) return;
-
-    final removedTag = _tags[index];
-    _tags.removeAt(index);
-    notifyListeners();
-
-    widget.onTagRemoved?.call(removedTag);
-    widget.onTagsChanged?.call(_tags);
-  }
-}
-
-enum TagInputLayout { wrap, inline, column }
 
 class TagField extends StatefulWidget {
   // Tag Data
@@ -145,7 +76,8 @@ class TagField extends StatefulWidget {
   final bool caseSensitive;
   final bool submitOnEnter;
   final bool clearInputOnSubmit;
-
+  final TextOverflow tagTextOverflow;
+  final int? maxTagLines;
   const TagField({
     super.key,
     this.initialTags = const [],
@@ -198,6 +130,8 @@ class TagField extends StatefulWidget {
     this.caseSensitive = false,
     this.submitOnEnter = true,
     this.clearInputOnSubmit = true,
+    this.tagTextOverflow = TextOverflow.ellipsis,
+    this.maxTagLines = 1,
   });
 
   @override
@@ -247,10 +181,16 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            tag,
-            style: widget.tagTextStyle ??
-                TextStyle(color: widget.tagTextColor, fontSize: 14),
+          Flexible(
+            // Allow text to shrink if needed
+            child: Text(
+              tag,
+              style: widget.tagTextStyle ??
+                  TextStyle(color: widget.tagTextColor, fontSize: 14),
+              overflow: widget.tagTextOverflow,
+              maxLines: widget.maxTagLines,
+              softWrap: widget.maxTagLines != null && widget.maxTagLines! > 1,
+            ),
           ),
           if (widget.showDeleteIcon && widget.enabled) ...[
             const SizedBox(width: 4),
@@ -318,6 +258,42 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
               .map((entry) => _buildTag(entry.value, entry.key, notifier))
               .toList(),
         );
+      case TagInputLayout.insideBelow:
+        return Wrap(
+          spacing: widget.tagSpacing,
+          runSpacing: widget.tagRunSpacing,
+          alignment: widget.wrapAlignment,
+          crossAxisAlignment: widget.wrapCrossAlignment,
+          children: tags
+              .asMap()
+              .entries
+              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+              .toList(),
+        );
+      case TagInputLayout.outsideBelow:
+        return Wrap(
+          spacing: widget.tagSpacing,
+          runSpacing: widget.tagRunSpacing,
+          alignment: widget.wrapAlignment,
+          crossAxisAlignment: widget.wrapCrossAlignment,
+          children: tags
+              .asMap()
+              .entries
+              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+              .toList(),
+        );
+      case TagInputLayout.outsideAbove:
+        return Wrap(
+          spacing: widget.tagSpacing,
+          runSpacing: widget.tagRunSpacing,
+          alignment: widget.wrapAlignment,
+          crossAxisAlignment: widget.wrapCrossAlignment,
+          children: tags
+              .asMap()
+              .entries
+              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+              .toList(),
+        );
     }
   }
 
@@ -343,7 +319,7 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
             if (parts.isNotEmpty) {
               final tagToAdd = parts.first;
               if (tagToAdd.isNotEmpty) {
-                notifier.addTag(tagToAdd, context);
+                notifier.addTag(widget.allowDuplicates, tagToAdd, context);
                 if (widget.clearInputOnSubmit) {
                   _controller.clear();
                 }
@@ -355,7 +331,7 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
       },
       onSubmitted: (text) {
         if (widget.submitOnEnter) {
-          notifier.addTag(text, context);
+          notifier.addTag(widget.allowDuplicates, text, context);
           if (widget.clearInputOnSubmit) {
             _controller.clear();
           }

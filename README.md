@@ -55,6 +55,7 @@
         <p>Build completely custom tag UIs with flexible builders</p>
       </td>
     </tr>
+    <td colspan="3" align="center"> <div style="font-size: 64px; margin-bottom: 10px;">📌</div> <h3>Flexible Suggestion Positioning</h3> <p>Now supports <code>insideBelow</code>, <code>outsideAbove</code>, and <code>outsideBelow</code> tag suggestion positions</p> </td>
   </table>
   
 </div>
@@ -126,7 +127,7 @@ TagField(
                style="border-radius: 50%; border: 4px solid #667eea; box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);" 
                alt="afaqxdev"/>
           <br/><br/>
-          <strong style="font-size: 18px;">🎯 Afaq Ahmed</strong>
+          <strong style="font-size: 18px;">🎯 Afaq Zahir</strong>
           <br/>
           <sub style="color: #667eea; font-weight: bold;">Lead Developer & Architect</sub>
           <br/><br/>
@@ -147,7 +148,7 @@ TagField(
                style="border-radius: 50%; border: 4px solid #f093fb; box-shadow: 0 10px 25px rgba(240, 147, 251, 0.4);" 
                alt="ubaidxdev"/>
           <br/><br/>
-          <strong style="font-size: 18px;">⚡ Ubaid Ahmed</strong>
+          <strong style="font-size: 18px;">⚡ Ubaid Ullah </strong>
           <br/>
           <sub style="color: #f093fb; font-weight: bold;">Flutter Expert & Innovator</sub>
           <br/><br/>
@@ -168,9 +169,9 @@ TagField(
                style="border-radius: 50%; border: 4px solid #4facfe; box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);" 
                alt="uzairxdev"/>
           <br/><br/>
-          <strong style="font-size: 18px;">🚀 Uzair Ahmed</strong>
+          <strong style="font-size: 18px;">🚀 Muhammad Uzair</strong>
           <br/>
-          <sub style="color: #4facfe; font-weight: bold;">UI/UX Designer & Visionary</sub>
+          <sub style="color: #4facfe; font-weight: bold;">Flutter Expert & Innovator</sub>
           <br/><br/>
           <a href="https://github.com/uzairxdev">
             <img src="https://img.shields.io/badge/-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:tag_field/tag_field.dart';
+import 'package:tag_field/tag_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -258,10 +259,69 @@ class _TagInputExampleState extends State<TagInputExample> {
 
             const SizedBox(height: 24),
 
-            // Example 9: Column Layout with Animation
-            _buildSectionTitle('9. Column Layout with Animations'),
+            _buildSectionTitle(
+              '9. Column Layout with Animations and  Allow Duplicates',
+            ),
             TagField(
-              layout: TagInputLayout.column,
+              layout: TagInputLayout.wrap,
+              allowDuplicates: true,
+              tagBackgroundColor: Colors.pink.shade100,
+              tagTextColor: Colors.pink.shade800,
+              tagBorderColor: Colors.pink.shade300,
+              containerBorderColor: Colors.pink.shade200,
+              enableAnimations: true,
+              animationDuration: const Duration(milliseconds: 300),
+              animationCurve: Curves.bounceIn,
+              hintText: 'Add items vertically...',
+              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle(
+              '10.OutSide of Texfield and above  the Tag  with Animations ',
+            ),
+            TagField(
+              layout: TagInputLayout.outsideAbove,
+              allowDuplicates: true,
+              tagBackgroundColor: Colors.pink.shade100,
+              tagTextColor: Colors.pink.shade800,
+              tagBorderColor: Colors.pink.shade300,
+              containerBorderColor: Colors.pink.shade200,
+              enableAnimations: true,
+              animationDuration: const Duration(milliseconds: 300),
+              animationCurve: Curves.bounceIn,
+              hintText: 'Add items vertically...',
+              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle(
+              '12. OutSide of Texfield and below Side the Tag with Animations',
+            ),
+            TagField(
+              layout: TagInputLayout.outsideBelow,
+              allowDuplicates: true,
+              tagBackgroundColor: Colors.pink.shade100,
+              tagTextColor: Colors.pink.shade800,
+              tagBorderColor: Colors.pink.shade300,
+              containerBorderColor: Colors.pink.shade200,
+              enableAnimations: true,
+              animationDuration: const Duration(milliseconds: 300),
+              animationCurve: Curves.bounceIn,
+              hintText: 'Add items vertically...',
+              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle(
+              '12. Inside of Texfield and below Side the Tag  with Animations',
+            ),
+            TagField(
+              layout: TagInputLayout.insideBelow,
+              allowDuplicates: true,
               tagBackgroundColor: Colors.pink.shade100,
               tagTextColor: Colors.pink.shade800,
               tagBorderColor: Colors.pink.shade300,
