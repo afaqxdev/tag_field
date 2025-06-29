@@ -433,10 +433,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
 
@@ -446,10 +444,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
 
@@ -457,10 +453,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
         return Column(
           crossAxisAlignment: widget.crossAxisAlignment,
           mainAxisAlignment: widget.mainAxisAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
       case TagInputLayout.insideBelow:
@@ -469,10 +463,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
       case TagInputLayout.outsideBelow:
@@ -481,10 +473,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
       case TagInputLayout.outsideAbove:
@@ -493,10 +483,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
     }
@@ -570,37 +558,37 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
                   widget.containerBorderRadius,
                 ),
               ),
-              child: widget.layout == TagInputLayout.inline
-                  ? Wrap(
-                      spacing: widget.tagSpacing,
-                      runSpacing: widget.tagRunSpacing,
-                      alignment: widget.wrapAlignment,
-                      crossAxisAlignment: widget.wrapCrossAlignment,
-                      children: [
-                        ...notifier.tags.asMap().entries.map(
-                              (entry) =>
-                                  _buildTag(entry.value, entry.key, notifier),
-                            ),
-                        Container(
-                          constraints: const BoxConstraints(minWidth: 100),
-                          child: IntrinsicWidth(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 5),
-                              child: _buildInputField(notifier),
-                            ),
+              child: switch (widget.layout) {
+                TagInputLayout.inline => Wrap(
+                    spacing: widget.tagSpacing,
+                    runSpacing: widget.tagRunSpacing,
+                    alignment: widget.wrapAlignment,
+                    crossAxisAlignment: widget.wrapCrossAlignment,
+                    children: [
+                      ...notifier.tags.indexed.map(
+                        (entry) => _buildTag(entry.$2, entry.$1, notifier),
+                      ),
+                      Container(
+                        constraints: const BoxConstraints(minWidth: 100),
+                        child: IntrinsicWidth(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: _buildInputField(notifier),
                           ),
                         ),
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: widget.crossAxisAlignment,
-                      mainAxisAlignment: widget.mainAxisAlignment,
-                      children: [
-                        _buildTags(notifier.tags, notifier),
-                        if (notifier.tags.isNotEmpty) const SizedBox(height: 8),
-                        _buildInputField(notifier),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                _ => Column(
+                    crossAxisAlignment: widget.crossAxisAlignment,
+                    mainAxisAlignment: widget.mainAxisAlignment,
+                    children: [
+                      _buildTags(notifier.tags, notifier),
+                      if (notifier.tags.isNotEmpty) const SizedBox(height: 8),
+                      _buildInputField(notifier),
+                    ],
+                  )
+              },
             ),
           );
         },
