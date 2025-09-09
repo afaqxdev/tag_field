@@ -1,5 +1,3 @@
-// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:tag_field/tag_field.dart';
 import 'package:tag_field/tag_provider.dart';
@@ -26,7 +24,7 @@ class TagInputExample extends StatefulWidget {
   const TagInputExample({super.key});
 
   @override
-  _TagInputExampleState createState() => _TagInputExampleState();
+  State<TagInputExample> createState() => _TagInputExampleState();
 }
 
 class _TagInputExampleState extends State<TagInputExample> {
@@ -170,7 +168,7 @@ class _TagInputExampleState extends State<TagInputExample> {
               hintText: 'Project names...',
               maxTags: 5,
               onTagsChanged: (tags) => setState(() => projectTags = tags),
-              onTagAdded: (tag) => print('Added project: $tag'),
+              onTagAdded: (tag) => debugPrint('Added project: $tag'),
             ),
 
             const SizedBox(height: 24),

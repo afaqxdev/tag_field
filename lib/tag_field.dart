@@ -1,3 +1,8 @@
+/// A Flutter library for creating customizable tag input fields.
+///
+/// This library provides a comprehensive tag input widget that allows users to
+/// add, remove, and display tags with extensive customization options for
+/// appearance, behavior, and layout.
 library;
 
 import 'package:flutter/material.dart';
@@ -8,76 +13,267 @@ export 'package:provider/provider.dart'; // Export provider if needed
 
 export 'tag_field.dart';
 
+/// A highly customizable tag input field widget for Flutter applications.
+///
+/// [TagField] provides a complete solution for tag input with features including:
+/// - Multiple layout options (wrap, inline, column, etc.)
+/// - Extensive visual customization
+/// - Tag validation and duplicate checking
+/// - Animation support
+/// - Custom tag builders
+/// - Various input behaviors
+///
+/// Example usage:
+/// ```dart
+/// TagField(
+///   initialTags: ['flutter', 'dart'],
+///   maxTags: 10,
+///   allowDuplicates: false,
+///   hintText: 'Add programming languages...',
+///   onTagsChanged: (tags) {
+///     print('Tags updated: $tags');
+///   },
+///   tagBackgroundColor: Colors.blue.shade100,
+///   tagTextColor: Colors.blue.shade800,
+/// )
+/// ```
 class TagField extends StatefulWidget {
-  // Tag Data
+  // Tag Data Configuration
+
+  /// The initial list of tags to display when the widget is first created.
+  ///
+  /// These tags will be added to the field automatically and can be removed
+  /// by the user if [showDeleteIcon] is enabled.
   final List<String> initialTags;
+
+  /// The maximum number of tags that can be added to the field.
+  ///
+  /// When this limit is reached, no more tags can be added. Set to `null`
+  /// for unlimited tags.
   final int? maxTags;
+
+  /// Whether duplicate tags are allowed in the field.
+  ///
+  /// When `false`, attempting to add a duplicate tag will show an error message.
+  /// Comparison respects [caseSensitive] and [trimTags] settings.
   final bool allowDuplicates;
 
   // Input Field Customization
+
+  /// The hint text displayed in the input field when it's empty.
   final String hintText;
+
+  /// The text style applied to the input field text.
+  ///
+  /// If not provided, uses the default text style from the theme.
   final TextStyle? inputTextStyle;
+
+  /// Custom input decoration for the text field.
+  ///
+  /// If not provided, uses a simple decoration with no border and the [hintText].
   final InputDecoration? inputDecoration;
+
+  /// Whether the input field is enabled for user interaction.
+  ///
+  /// When `false`, the field becomes read-only and users cannot add or remove tags.
   final bool enabled;
+
+  /// Custom focus node for the input field.
+  ///
+  /// If not provided, the widget creates its own focus node internally.
   final FocusNode? focusNode;
+
+  /// The action to show on the keyboard when the input field is focused.
   final TextInputAction textInputAction;
+
+  /// List of characters that trigger tag creation when typed.
+  ///
+  /// Common separators include space, comma, and newline. When any of these
+  /// characters are typed, the current input is converted to a tag.
   final List<String> separators;
 
-  // Tag Appearance
+  // Tag Appearance Customization
+
+  /// The background color of individual tags.
   final Color tagBackgroundColor;
+
+  /// The text color for tag labels.
   final Color tagTextColor;
+
+  /// The border color for tags.
   final Color tagBorderColor;
+
+  /// The width of the tag borders in logical pixels.
   final double tagBorderWidth;
+
+  /// The border radius for tag corners in logical pixels.
   final double tagBorderRadius;
+
+  /// Custom text style for tag labels.
+  ///
+  /// If not provided, uses [tagTextColor] with a default font size.
   final TextStyle? tagTextStyle;
+
+  /// Internal padding within each tag.
   final EdgeInsetsGeometry tagPadding;
+
+  /// External margin around each tag.
   final EdgeInsetsGeometry tagMargin;
+
+  /// Horizontal spacing between tags in wrap layouts.
   final double tagSpacing;
+
+  /// Vertical spacing between tag rows in wrap layouts.
   final double tagRunSpacing;
 
   // Delete Icon Customization
+
+  /// The icon used for the delete button on tags.
   final IconData deleteIcon;
+
+  /// The color of the delete icon.
   final Color deleteIconColor;
+
+  /// The size of the delete icon in logical pixels.
   final double deleteIconSize;
+
+  /// Whether to show the delete icon on tags.
+  ///
+  /// When `false`, tags cannot be removed by clicking. They can still be
+  /// removed programmatically through the notifier.
   final bool showDeleteIcon;
 
   // Container Customization
+
+  /// The background color of the main container.
   final Color containerBackgroundColor;
+
+  /// The border color of the main container.
   final Color containerBorderColor;
+
+  /// The width of the container border in logical pixels.
   final double containerBorderWidth;
+
+  /// The border radius of the container in logical pixels.
   final double containerBorderRadius;
+
+  /// Internal padding of the main container.
   final EdgeInsetsGeometry containerPadding;
+
+  /// Fixed height of the container.
+  ///
+  /// If null, the container height adjusts to its content.
   final double? containerHeight;
+
+  /// Minimum height constraint for the container.
   final double? containerMinHeight;
+
+  /// Maximum height constraint for the container.
   final double? containerMaxHeight;
 
   // Layout Options
+
+  /// The layout strategy for displaying tags.
+  ///
+  /// See [TagInputLayout] for available options including wrap, inline, column,
+  /// and various positioning options relative to the input field.
   final TagInputLayout layout;
+
+  /// Cross-axis alignment for column layout.
   final CrossAxisAlignment crossAxisAlignment;
+
+  /// Main axis alignment for column layout.
   final MainAxisAlignment mainAxisAlignment;
+
+  /// Alignment for wrap layout.
   final WrapAlignment wrapAlignment;
+
+  /// Cross-axis alignment for wrap layout.
   final WrapCrossAlignment wrapCrossAlignment;
 
-  // Animation
+  // Animation Configuration
+
+  /// Duration for tag addition and removal animations.
   final Duration animationDuration;
+
+  /// Animation curve for tag transitions.
   final Curve animationCurve;
+
+  /// Whether to enable animations for tag operations.
+  ///
+  /// When `false`, tag changes happen instantly without animation.
   final bool enableAnimations;
 
-  // Callbacks
+  // Callback Functions
+
+  /// Called whenever the tag list changes (addition or removal).
+  ///
+  /// Provides the current list of all tags.
   final Function(List<String>)? onTagsChanged;
+
+  /// Called when a new tag is successfully added.
+  ///
+  /// Provides the tag that was added.
   final Function(String)? onTagAdded;
+
+  /// Called when a tag is removed.
+  ///
+  /// Provides the tag that was removed.
   final Function(String)? onTagRemoved;
+
+  /// Custom validation function for tags.
+  ///
+  /// Should return an error message string if the tag is invalid,
+  /// or null if the tag is valid.
   final String? Function(String)? tagValidator;
+
+  /// Custom builder function for tag widgets.
+  ///
+  /// Allows complete customization of tag appearance and behavior.
+  /// Parameters: tag text, index, and delete callback function.
   final Widget Function(String, int, VoidCallback)? tagBuilder;
 
-  // Behavior
+  // Behavior Configuration
+
+  /// Whether the input field should automatically receive focus.
   final bool autofocus;
+
+  /// Whether to trim whitespace from tags before adding them.
   final bool trimTags;
+
+  /// Whether tag comparison is case-sensitive.
+  ///
+  /// Affects duplicate detection and tag processing.
   final bool caseSensitive;
+
+  /// Whether pressing Enter should submit the current input as a tag.
   final bool submitOnEnter;
+
+  /// Whether to clear the input field after successfully adding a tag.
   final bool clearInputOnSubmit;
+
+  /// How to handle text overflow in tag labels.
   final TextOverflow tagTextOverflow;
+
+  /// Maximum number of lines for tag text.
+  ///
+  /// Set to `null` for unlimited lines.
   final int? maxTagLines;
+
+  /// Creates a new [TagField] widget.
+  ///
+  /// All parameters are optional and have sensible defaults for most use cases.
+  ///
+  /// Example:
+  /// ```dart
+  /// TagField(
+  ///   initialTags: ['flutter', 'dart'],
+  ///   maxTags: 5,
+  ///   allowDuplicates: false,
+  ///   hintText: 'Add technologies...',
+  ///   onTagsChanged: (tags) => setState(() => _tags = tags),
+  /// )
+  /// ```
   const TagField({
     super.key,
     this.initialTags = const [],
@@ -138,9 +334,18 @@ class TagField extends StatefulWidget {
   State<TagField> createState() => _TagFieldState();
 }
 
+/// The state class for [TagField] that manages the widget's lifecycle and interactions.
+///
+/// This class handles text input, focus management, and animation controllers.
+/// It uses [TickerProviderStateMixin] to support animations.
 class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
+  /// Controller for the text input field.
   final TextEditingController _controller = TextEditingController();
+
+  /// Focus node for the input field, either provided by widget or created internally.
   late FocusNode _focusNode;
+
+  /// Animation controller for tag addition and removal animations.
   late AnimationController _animationController;
 
   @override
@@ -228,10 +433,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
 
@@ -241,10 +444,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
 
@@ -252,10 +453,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
         return Column(
           crossAxisAlignment: widget.crossAxisAlignment,
           mainAxisAlignment: widget.mainAxisAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
       case TagInputLayout.insideBelow:
@@ -264,10 +463,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
       case TagInputLayout.outsideBelow:
@@ -276,10 +473,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
       case TagInputLayout.outsideAbove:
@@ -288,10 +483,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           runSpacing: widget.tagRunSpacing,
           alignment: widget.wrapAlignment,
           crossAxisAlignment: widget.wrapCrossAlignment,
-          children: tags
-              .asMap()
-              .entries
-              .map((entry) => _buildTag(entry.value, entry.key, notifier))
+          children: tags.indexed
+              .map((entry) => _buildTag(entry.$2, entry.$1, notifier))
               .toList(),
         );
     }
@@ -365,37 +558,37 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
                   widget.containerBorderRadius,
                 ),
               ),
-              child: widget.layout == TagInputLayout.inline
-                  ? Wrap(
-                      spacing: widget.tagSpacing,
-                      runSpacing: widget.tagRunSpacing,
-                      alignment: widget.wrapAlignment,
-                      crossAxisAlignment: widget.wrapCrossAlignment,
-                      children: [
-                        ...notifier.tags.asMap().entries.map(
-                              (entry) =>
-                                  _buildTag(entry.value, entry.key, notifier),
-                            ),
-                        Container(
-                          constraints: const BoxConstraints(minWidth: 100),
-                          child: IntrinsicWidth(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 5),
-                              child: _buildInputField(notifier),
-                            ),
+              child: switch (widget.layout) {
+                TagInputLayout.inline => Wrap(
+                    spacing: widget.tagSpacing,
+                    runSpacing: widget.tagRunSpacing,
+                    alignment: widget.wrapAlignment,
+                    crossAxisAlignment: widget.wrapCrossAlignment,
+                    children: [
+                      ...notifier.tags.indexed.map(
+                        (entry) => _buildTag(entry.$2, entry.$1, notifier),
+                      ),
+                      Container(
+                        constraints: const BoxConstraints(minWidth: 100),
+                        child: IntrinsicWidth(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: _buildInputField(notifier),
                           ),
                         ),
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: widget.crossAxisAlignment,
-                      mainAxisAlignment: widget.mainAxisAlignment,
-                      children: [
-                        _buildTags(notifier.tags, notifier),
-                        if (notifier.tags.isNotEmpty) const SizedBox(height: 8),
-                        _buildInputField(notifier),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                _ => Column(
+                    crossAxisAlignment: widget.crossAxisAlignment,
+                    mainAxisAlignment: widget.mainAxisAlignment,
+                    children: [
+                      _buildTags(notifier.tags, notifier),
+                      if (notifier.tags.isNotEmpty) const SizedBox(height: 8),
+                      _buildInputField(notifier),
+                    ],
+                  )
+              },
             ),
           );
         },
