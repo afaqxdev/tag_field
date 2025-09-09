@@ -182,6 +182,27 @@ TagField(
           </a>
         </div>
       </td>
+         <td align="center" width="250">
+        <div>
+          <img src="https://avatars.githubusercontent.com/u/66121828?v=4" 
+               width="120" 
+               height="120" 
+               style="border-radius: 50%; border: 4px solid #4facfe; box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);" 
+               alt="uzairxdev"/>
+          <br/><br/>
+          <strong style="font-size: 18px;">🚀 Munsif Ali</strong>
+          <br/>
+          <sub style="color: #4facfe; font-weight: bold;">Flutter Guru</sub>
+          <br/><br/>
+          <a href="https://github.com/Munsif-Ali">
+            <img src="https://img.shields.io/badge/-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+          </a>
+          <br/>
+          <a href="mailto:munsifalitaj@gmail.com">
+            <img src="https://img.shields.io/badge/-Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/>
+          </a>
+        </div>
+      </td>
     </tr>
   </table>
 
