@@ -6,12 +6,14 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tag_field/tag_provider.dart';
 
 export 'package:provider/provider.dart'; // Export provider if needed
 
-export 'tag_field.dart';
+export 'tag_form_field.dart';
+export 'tag_provider.dart';
 
 /// A highly customizable tag input field widget for Flutter applications.
 ///
@@ -260,6 +262,29 @@ class TagField extends StatefulWidget {
   /// Set to `null` for unlimited lines.
   final int? maxTagLines;
 
+  /// List of predefined suggestions for auto-completion.
+  final List<String>? suggestions;
+
+  /// Custom builder for suggestion dropdown items.
+  final Widget Function(
+    BuildContext context,
+    String suggestion,
+    VoidCallback onTap,
+  )?
+  suggestionBuilder;
+
+  /// Maximum height of the suggestions overlay list.
+  final double suggestionMaxHeight;
+
+  /// Background color of the suggestions overlay list.
+  final Color? suggestionBackgroundColor;
+
+  /// Input formatters to apply to the text input field.
+  final List<TextInputFormatter>? inputFormatters;
+
+  /// Maximum character length of a single tag.
+  final int? maxTagLength;
+
   /// Creates a new [TagField] widget.
   ///
   /// All parameters are optional and have sensible defaults for most use cases.
@@ -328,6 +353,12 @@ class TagField extends StatefulWidget {
     this.clearInputOnSubmit = true,
     this.tagTextOverflow = TextOverflow.ellipsis,
     this.maxTagLines = 1,
+    this.suggestions,
+    this.suggestionBuilder,
+    this.suggestionMaxHeight = 200.0,
+    this.suggestionBackgroundColor,
+    this.inputFormatters,
+    this.maxTagLength,
   });
 
   @override
@@ -348,38 +379,214 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
   /// Animation controller for tag addition and removal animations.
   late AnimationController _animationController;
 
+  /// Notifier managing the state of tags.
+  late TagInputNotifier _notifier;
+
+  /// Layer link for suggestions dropdown overlay positioning.
+  final LayerLink _layerLink = LayerLink();
+
+  /// Overlay entry reference for the suggestions panel.
+  OverlayEntry? _overlayEntry;
+
+  /// Index of the currently highlighted tag for keyboard delete navigation.
+  int? _highlightedTagIndex;
+
   @override
   void initState() {
     super.initState();
+    _notifier = TagInputNotifier(widget);
     _focusNode = widget.focusNode ?? FocusNode();
+    _focusNode.addListener(_handleFocusChanged);
+    _focusNode.onKeyEvent = _handleKeyEvent;
     _animationController = AnimationController(
       duration: widget.animationDuration,
       vsync: this,
     );
   }
 
+  void _handleFocusChanged() {
+    if (!_focusNode.hasFocus) {
+      _hideSuggestionsOverlay();
+      setState(() {
+        _highlightedTagIndex = null;
+      });
+    }
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      final text = _controller.text;
+
+      if (text.isEmpty && _notifier.tags.isNotEmpty) {
+        if (key == LogicalKeyboardKey.backspace) {
+          if (_highlightedTagIndex == null) {
+            setState(() {
+              _highlightedTagIndex = _notifier.tags.length - 1;
+            });
+            return KeyEventResult.handled;
+          } else {
+            _notifier.removeTag(_highlightedTagIndex!);
+            setState(() {
+              _highlightedTagIndex = null;
+            });
+            return KeyEventResult.handled;
+          }
+        } else if (key == LogicalKeyboardKey.arrowLeft) {
+          setState(() {
+            if (_highlightedTagIndex == null) {
+              _highlightedTagIndex = _notifier.tags.length - 1;
+            } else if (_highlightedTagIndex! > 0) {
+              _highlightedTagIndex = _highlightedTagIndex! - 1;
+            }
+          });
+          return KeyEventResult.handled;
+        } else if (key == LogicalKeyboardKey.arrowRight) {
+          setState(() {
+            if (_highlightedTagIndex != null) {
+              if (_highlightedTagIndex! < _notifier.tags.length - 1) {
+                _highlightedTagIndex = _highlightedTagIndex! + 1;
+              } else {
+                _highlightedTagIndex = null;
+              }
+            }
+          });
+          return KeyEventResult.handled;
+        } else if (key == LogicalKeyboardKey.delete) {
+          if (_highlightedTagIndex != null) {
+            _notifier.removeTag(_highlightedTagIndex!);
+            setState(() {
+              _highlightedTagIndex = null;
+            });
+            return KeyEventResult.handled;
+          }
+        }
+      }
+
+      if (_highlightedTagIndex != null) {
+        setState(() {
+          _highlightedTagIndex = null;
+        });
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  @override
+  void didUpdateWidget(covariant TagField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Structural equality is not identity based, but for simple list comparison:
+    if (widget.initialTags != oldWidget.initialTags) {
+      _notifier.updateTags(widget.initialTags);
+    }
+  }
+
   @override
   void dispose() {
+    _hideSuggestionsOverlay();
     _controller.dispose();
+    _focusNode.removeListener(_handleFocusChanged);
     if (widget.focusNode == null) {
       _focusNode.dispose();
     }
     _animationController.dispose();
+    _notifier.dispose();
     super.dispose();
   }
 
+  void _showSuggestionsOverlay(List<String> matches) {
+    _hideSuggestionsOverlay();
+    if (matches.isEmpty) return;
+
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    final size = renderBox?.size ?? Size.zero;
+    final width = size.width > 0 ? size.width : 250.0;
+
+    final overlay = Overlay.of(context);
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          width: width,
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            targetAnchor: Alignment.bottomLeft,
+            followerAnchor: Alignment.topLeft,
+            offset: const Offset(0, 5),
+            child: Material(
+              elevation: 4.0,
+              borderRadius: BorderRadius.circular(8),
+              color:
+                  widget.suggestionBackgroundColor ??
+                  Theme.of(context).cardColor,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: widget.suggestionMaxHeight,
+                ),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: matches.length,
+                  itemBuilder: (context, index) {
+                    final suggestion = matches[index];
+                    if (widget.suggestionBuilder != null) {
+                      return widget.suggestionBuilder!(
+                        context,
+                        suggestion,
+                        () => _selectSuggestion(suggestion),
+                      );
+                    }
+                    return ListTile(
+                      title: Text(suggestion),
+                      onTap: () => _selectSuggestion(suggestion),
+                      dense: true,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    overlay.insert(_overlayEntry!);
+  }
+
+  void _hideSuggestionsOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _selectSuggestion(String suggestion) {
+    _notifier.addTag(widget.allowDuplicates, suggestion, context);
+    if (widget.clearInputOnSubmit) {
+      _controller.clear();
+    }
+    _hideSuggestionsOverlay();
+    _focusNode.requestFocus();
+  }
+
   Widget _buildDefaultTag(String tag, int index, VoidCallback onDelete) {
+    final isHighlighted = _highlightedTagIndex == index;
+    final theme = Theme.of(context);
     return AnimatedContainer(
-      duration:
-          widget.enableAnimations ? widget.animationDuration : Duration.zero,
+      duration: widget.enableAnimations
+          ? widget.animationDuration
+          : Duration.zero,
       curve: widget.animationCurve,
       margin: widget.tagMargin,
       padding: widget.tagPadding,
       decoration: BoxDecoration(
-        color: widget.tagBackgroundColor,
+        color: isHighlighted
+            ? theme.colorScheme.primary.withValues(alpha: 0.15)
+            : widget.tagBackgroundColor,
         border: Border.all(
-          color: widget.tagBorderColor,
-          width: widget.tagBorderWidth,
+          color: isHighlighted
+              ? theme.colorScheme.primary
+              : widget.tagBorderColor,
+          width: isHighlighted
+              ? widget.tagBorderWidth + 1.0
+              : widget.tagBorderWidth,
         ),
         borderRadius: BorderRadius.circular(widget.tagBorderRadius),
       ),
@@ -390,7 +597,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
             // Allow text to shrink if needed
             child: Text(
               tag,
-              style: widget.tagTextStyle ??
+              style:
+                  widget.tagTextStyle ??
                   TextStyle(color: widget.tagTextColor, fontSize: 14),
               overflow: widget.tagTextOverflow,
               maxLines: widget.maxTagLines,
@@ -498,7 +706,13 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
       autofocus: widget.autofocus,
       style: widget.inputTextStyle,
       textInputAction: widget.textInputAction,
-      decoration: widget.inputDecoration ??
+      inputFormatters: [
+        if (widget.maxTagLength != null)
+          LengthLimitingTextInputFormatter(widget.maxTagLength),
+        ...?widget.inputFormatters,
+      ],
+      decoration:
+          widget.inputDecoration ??
           InputDecoration(
             hintText: widget.hintText,
             border: InputBorder.none,
@@ -506,6 +720,11 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
             isDense: true,
           ),
       onChanged: (text) {
+        if (_highlightedTagIndex != null) {
+          setState(() {
+            _highlightedTagIndex = null;
+          });
+        }
         for (String separator in widget.separators) {
           if (text.contains(separator)) {
             final parts = text.split(separator);
@@ -515,11 +734,28 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
                 notifier.addTag(widget.allowDuplicates, tagToAdd, context);
                 if (widget.clearInputOnSubmit) {
                   _controller.clear();
+                  _hideSuggestionsOverlay();
+                  return;
                 }
               }
             }
             return;
           }
+        }
+
+        // Suggestions logic
+        if (widget.suggestions != null && text.isNotEmpty) {
+          final query = widget.caseSensitive ? text : text.toLowerCase();
+          final matches = widget.suggestions!.where((suggestion) {
+            final normalized = widget.caseSensitive
+                ? suggestion
+                : suggestion.toLowerCase();
+            return normalized.contains(query) &&
+                !notifier.tags.contains(suggestion);
+          }).toList();
+          _showSuggestionsOverlay(matches);
+        } else {
+          _hideSuggestionsOverlay();
         }
       },
       onSubmitted: (text) {
@@ -528,6 +764,7 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
           if (widget.clearInputOnSubmit) {
             _controller.clear();
           }
+          _hideSuggestionsOverlay();
         }
       },
     );
@@ -535,8 +772,8 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => TagInputNotifier(widget),
+    return ChangeNotifierProvider.value(
+      value: _notifier,
       child: Consumer<TagInputNotifier>(
         builder: (context, notifier, child) {
           return GestureDetector(
@@ -560,34 +797,40 @@ class _TagFieldState extends State<TagField> with TickerProviderStateMixin {
               ),
               child: switch (widget.layout) {
                 TagInputLayout.inline => Wrap(
-                    spacing: widget.tagSpacing,
-                    runSpacing: widget.tagRunSpacing,
-                    alignment: widget.wrapAlignment,
-                    crossAxisAlignment: widget.wrapCrossAlignment,
-                    children: [
-                      ...notifier.tags.indexed.map(
-                        (entry) => _buildTag(entry.$2, entry.$1, notifier),
-                      ),
-                      Container(
-                        constraints: const BoxConstraints(minWidth: 100),
-                        child: IntrinsicWidth(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 5),
+                  spacing: widget.tagSpacing,
+                  runSpacing: widget.tagRunSpacing,
+                  alignment: widget.wrapAlignment,
+                  crossAxisAlignment: widget.wrapCrossAlignment,
+                  children: [
+                    ...notifier.tags.indexed.map(
+                      (entry) => _buildTag(entry.$2, entry.$1, notifier),
+                    ),
+                    Container(
+                      constraints: const BoxConstraints(minWidth: 100),
+                      child: IntrinsicWidth(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: CompositedTransformTarget(
+                            link: _layerLink,
                             child: _buildInputField(notifier),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
                 _ => Column(
-                    crossAxisAlignment: widget.crossAxisAlignment,
-                    mainAxisAlignment: widget.mainAxisAlignment,
-                    children: [
-                      _buildTags(notifier.tags, notifier),
-                      if (notifier.tags.isNotEmpty) const SizedBox(height: 8),
-                      _buildInputField(notifier),
-                    ],
-                  )
+                  crossAxisAlignment: widget.crossAxisAlignment,
+                  mainAxisAlignment: widget.mainAxisAlignment,
+                  children: [
+                    _buildTags(notifier.tags, notifier),
+                    if (notifier.tags.isNotEmpty) const SizedBox(height: 8),
+                    CompositedTransformTarget(
+                      link: _layerLink,
+                      child: _buildInputField(notifier),
+                    ),
+                  ],
+                ),
               },
             ),
           );

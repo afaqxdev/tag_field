@@ -47,6 +47,15 @@ class TagInputNotifier extends ChangeNotifier {
     _tags = List.from(widget.initialTags);
   }
 
+  /// Updates the tags list and notifies listeners.
+  ///
+  /// This is useful when the parent widget updates the [TagField.initialTags]
+  /// or when a form is reset.
+  void updateTags(List<String> newTags) {
+    _tags = List.from(newTags);
+    notifyListeners();
+  }
+
   /// Processes a tag according to the field's configuration.
   ///
   /// Applies trimming and case sensitivity settings from the [TagField].
@@ -93,13 +102,13 @@ class TagInputNotifier extends ChangeNotifier {
   /// Parameters:
   /// - [duplicate]: Whether to allow duplicate tags for this operation
   /// - [tag]: The tag string to add
-  /// - [context]: The [BuildContext] for showing error messages
+  /// - [context]: The optional [BuildContext] for showing error messages (can be null in tests)
   ///
   /// Example:
   /// ```dart
   /// notifier.addTag(false, 'flutter', context);
   /// ```
-  void addTag(bool duplicate, String tag, BuildContext context) {
+  void addTag(bool duplicate, String tag, BuildContext? context) {
     if (tag.isEmpty) return;
 
     String processedTag = _processTag(tag);
@@ -107,9 +116,11 @@ class TagInputNotifier extends ChangeNotifier {
     // Check for duplicates
     if (!duplicate && _isDuplicate(processedTag)) {
       if (!widget.allowDuplicates) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Duplicate tags are not allowed')),
-        );
+        if (context != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Duplicate tags are not allowed')),
+          );
+        }
         return;
       }
       // If duplicates are allowed, proceed without further checks
@@ -117,9 +128,11 @@ class TagInputNotifier extends ChangeNotifier {
 
     // Check max tags limit
     if (widget.maxTags != null && _tags.length >= widget.maxTags!) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maximum tag limit reached')),
-      );
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Maximum tag limit reached')),
+        );
+      }
       return;
     }
 
@@ -127,9 +140,11 @@ class TagInputNotifier extends ChangeNotifier {
     if (widget.tagValidator != null) {
       final validationError = widget.tagValidator!(processedTag);
       if (validationError != null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(validationError)));
+        if (context != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(validationError)),
+          );
+        }
         return;
       }
     }

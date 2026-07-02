@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tag_field/tag_field.dart';
-import 'package:tag_field/tag_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,6 +36,25 @@ class _TagInputExampleState extends State<TagInputExample> {
   List<String> projectTags = ['Mobile App'];
   List<String> socialTags = ['@flutter'];
   List<String> locationTags = ['New York'];
+
+  final _formKey = GlobalKey<FormState>();
+  List<String> formTags = ['Flutter', 'Dart'];
+  List<String> submittedTags = [];
+
+  List<String> suggestionTags = [];
+  final List<String> allCountries = [
+    'United States',
+    'United Kingdom',
+    'Canada',
+    'Australia',
+    'Germany',
+    'France',
+    'Japan',
+    'Brazil',
+    'India',
+    'China',
+  ];
+  List<String> formattedTags = [];
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +236,7 @@ class _TagInputExampleState extends State<TagInputExample> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.teal.shade200.withOpacity(0.5),
+                        color: Colors.teal.shade200.withValues(alpha: 0.5),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -329,6 +348,108 @@ class _TagInputExampleState extends State<TagInputExample> {
               animationCurve: Curves.bounceIn,
               hintText: 'Add items vertically...',
               crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle('13. Form Integration (TagFormField)'),
+            Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TagFormField(
+                    initialValue: formTags,
+                    validator: (tags) {
+                      if (tags == null || tags.isEmpty) {
+                        return 'Please add at least one tag';
+                      }
+                      if (tags.length < 2) {
+                        return 'Please add at least 2 tags';
+                      }
+                      return null;
+                    },
+                    onSaved: (tags) {
+                      setState(() {
+                        submittedTags = tags ?? [];
+                      });
+                    },
+                    containerBorderRadius: 10,
+                    hintText: 'Add at least 2 tags to submit...',
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                          }
+                        },
+                        child: const Text('Submit Form'),
+                      ),
+                      const SizedBox(width: 12),
+                      OutlinedButton(
+                        onPressed: () {
+                          _formKey.currentState!.reset();
+                          setState(() {
+                            submittedTags = [];
+                          });
+                        },
+                        child: const Text('Reset Form'),
+                      ),
+                    ],
+                  ),
+                  if (submittedTags.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Submitted Tags: ${submittedTags.join(", ")}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle('14. Suggestions & Auto-Complete Dropdown'),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                'Type a country name (e.g. United States, Canada, India...) to see the suggestions dropdown. '
+                'Press Backspace on an empty field to highlight the last tag, and Backspace again to delete. Use Left/Right Arrow keys to move highlight.',
+                style: TextStyle(fontSize: 13, color: Colors.black54),
+              ),
+            ),
+            TagField(
+              initialTags: suggestionTags,
+              suggestions: allCountries,
+              hintText: 'Type a country name...',
+              onTagsChanged: (tags) => setState(() => suggestionTags = tags),
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildSectionTitle('15. Alphanumeric Formatters & Character Limits'),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                'Only alphanumeric characters are allowed, and each tag is limited to a maximum of 10 characters.',
+                style: TextStyle(fontSize: 13, color: Colors.black54),
+              ),
+            ),
+            TagField(
+              initialTags: formattedTags,
+              maxTagLength: 10,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+              ],
+              hintText: 'Max 10 chars, alphanumeric only...',
+              onTagsChanged: (tags) => setState(() => formattedTags = tags),
             ),
 
             const SizedBox(height: 40),
