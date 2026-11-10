@@ -351,5 +351,5 @@ The `TagField` and `TagFormField` widgets accept the following configuration par
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by the tag_field team | © 2026</sub>
+  <sub>Built with ❤️ by <a href="https://www.afaqzahir.com">Afaq Zahir</a>, Flutter developer | © 2026</sub>
 </div>
