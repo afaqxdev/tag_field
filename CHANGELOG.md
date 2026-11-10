@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.10]
+- Updated package homepage to https://www.afaqzahir.com.
+
 ## [1.0.9]
 - Added `TagFormField` for seamless form validation and saving.
 - Added floating auto-complete suggestions dropdown using overlay targets.
